@@ -64,11 +64,12 @@ export function SiteVideo({ mp4, av1, mobile, poster, className, priority = fals
       v.preload = "auto";
       if (!autoPlay) { v.load(); return; }
       if (typeof IntersectionObserver === "undefined") { void v.play().catch(() => {}); return; }
-      // Buffer now; play only near the viewport so off-screen clips don't cost decoding time.
+      // Buffer now; play only while (almost) on screen, so at most one or two clips decode at a time
+      // and the browser's scrolling never competes with off-screen video decoding.
       io = new IntersectionObserver(([e]) => {
         if (e?.isIntersecting) void v.play().catch(() => {});
         else v.pause();
-      }, { rootMargin: "60% 0px" });
+      }, { rootMargin: "15% 0px" });
       io.observe(v);
       if (v.readyState < 2) v.load();
     });

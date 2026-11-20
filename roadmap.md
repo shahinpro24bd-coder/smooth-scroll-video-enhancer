@@ -10,5 +10,5 @@
 - [x] Hero video interim: 3 recreated clips live on the site (23s loop)
 - [ ] Recreate hero clips 4–9 with the new logo and rebuild the full hero video — blocked: workspace out of video credits
 - [x] Move the site into this project (photos and videos re-uploaded here)
-- [x] Smooth desktop scrolling + lighter scroll work
+- [x] Fix stuttering scroll (native scrolling, videos play only on screen, lighter scroll effects)
 - [x] Enhance all site videos to sharper full HD

@@ -7,7 +7,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { company, services } from "@/lib/site";
 import { Reveal, Words, dl } from "@/components/site/Reveal";
-import { getLenis, scrollToTop, startSmoothScroll } from "@/lib/smooth-scroll";
 
 
 export function Topbar() {
@@ -113,7 +112,6 @@ export function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    if (open) getLenis()?.stop(); else getLenis()?.start();
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", onKey);
     return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", onKey); };
@@ -364,7 +362,7 @@ function BackToTop() {
       </a>
       {show && (
         <button className="btn btn-lg btn-dark btn-lg-square back-to-top" style={{ display: "flex" }} aria-label="Back to top"
-          onClick={scrollToTop}>
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           <i className="bi bi-arrow-up"></i>
         </button>
       )}
@@ -384,7 +382,7 @@ function usePauseOffscreen() {
       for (const e of es) for (const an of loops(e.target)) {
         if (e.isIntersecting) { if (an.playState === "paused") an.play(); } else if (an.playState === "running") an.pause();
       }
-    }, { rootMargin: "60% 0px 60% 0px" });
+    }, { rootMargin: "20% 0px 20% 0px" });
     const seen = new WeakSet<Element>();
     const scan = () => document.querySelectorAll("section, .band, footer").forEach((el) => { if (!seen.has(el)) { seen.add(el); io.observe(el); } });
     const t1 = window.setTimeout(scan, 800);
@@ -393,29 +391,8 @@ function usePauseOffscreen() {
   }, [pathname]);
 }
 
-/** Buttery inertia scrolling on desktop; re-syncs after every page change. */
-function useSmoothScroll() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  useEffect(() => {
-    let stop: (() => void) | undefined;
-    let alive = true;
-    void startSmoothScroll().then((fn) => { if (alive) stop = fn; else fn(); });
-    return () => { alive = false; stop?.(); };
-  }, []);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const l = getLenis();
-      if (!l) return;
-      l.scrollTo(window.scrollY, { immediate: true, force: true });
-      l.resize();
-    });
-    return () => cancelAnimationFrame(id);
-  }, [pathname]);
-}
-
 export function SiteLayout({ children }: { children: ReactNode }) {
   usePauseOffscreen();
-  useSmoothScroll();
   return (
     <>
       <Topbar />

@@ -1351,7 +1351,7 @@ small, .small { color: #5A6472; }
 /* --- Scroll-linked motion (HomeContent writes --abp / --abd on scroll) ---
    Uses the individual `translate` property so it stacks with reveal/hover transforms without lag. */
 .abm { --abp: .5; --abd: 0; }
-.abm-grid { background-position: 0 calc(var(--abp) * 128px); }
+.abm-grid { will-change: transform; }
 .abm-glow { translate: calc(var(--abp) * -120px) calc(var(--abp) * 260px); }
 .abm-video { transform: scale(1.12); translate: 0 calc((var(--abp) - .5) * 60px); }
 .abm-frame:hover .abm-video { transform: scale(1.16); }
@@ -1595,19 +1595,11 @@ small, .small { color: #5A6472; }
   .rx .ind-kicker::before, .rx .ft-h::after, .phx-line, .rx .abx-path::before { transform: none !important; transition: none !important; }
 }
 
-/* ===== Smooth scrolling (Lenis) + scroll performance ===== */
-html.lenis, html.lenis body { height: auto; }
-.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
-.lenis.lenis-smooth, .lenis.lenis-smooth body { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-smooth iframe { pointer-events: none; }
-
-/* Hero depth on scroll: --hxs (0 → 1) is written by HomeContent; individual transform
-   properties stack with the entrance animations instead of replacing them. */
-.hx { --hxs: 0; }
-.hx-video { scale: calc(1 + var(--hxs) * .1); translate: 0 calc(var(--hxs) * 14%); will-change: transform; }
-.hx-body { translate: 0 calc(var(--hxs) * -70px); }
-.hx-trust { translate: 0 calc(var(--hxs) * -34px); }
+/* ===== Scroll performance ===== */
+/* Native scrolling: the browser scrolls on its own fast thread, independent of page work. */
+html { scroll-behavior: auto; }
+/* Hero depth on scroll: HomeContent writes translate/scale straight onto these elements. */
+.hx-video, .hx-body, .hx-trust { will-change: transform; }
 
 /* Blur behind panels is re-painted on every scrolled/played frame. Near-opaque panels don't
    need it at all, and panels over the playing videos use a lighter blur. */
@@ -1615,7 +1607,4 @@ html.lenis, html.lenis body { height: auto; }
 .hx-trust { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .hx-kicker, .abm-live, .abm-hud, .ft-cta { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .qn-inner, .qn--scrolled .qn-inner { backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
-
-@media (prefers-reduced-motion: reduce) {
-  .hx-video, .hx-body, .hx-trust { scale: none; translate: none; }
-}
+.abm-video, .abm-sub, .abm-copy, .abm-glow, .abm-flow { will-change: transform; }

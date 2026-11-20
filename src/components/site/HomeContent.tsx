@@ -134,28 +134,32 @@ export function HomeContent() {
     window.addEventListener("resize", onScroll);
     return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); if (raf) cancelAnimationFrame(raf); };
   }, []);
-  // Hero scroll depth: --hxs goes 0 → 1 as the hero scrolls away; CSS gently pushes the video
-  // back and lifts/fades the copy (transform + opacity only, so it stays on the GPU).
+  // Hero scroll depth: as the hero scrolls away the video is gently pushed back and the copy lifts.
+  // Written straight onto the three elements (individual translate/scale, GPU-only) instead of a
+  // CSS variable on the section, so the browser never re-styles the whole hero on each frame.
   const hxRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = hxRef.current;
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const video = el.querySelector<HTMLElement>(".hx-video");
+    const body = el.querySelector<HTMLElement>(".hx-body");
+    const trust = el.querySelector<HTMLElement>(".hx-trust");
     let raf = 0;
     let last = -1;
     const update = () => {
       raf = 0;
-      const h = el.offsetHeight || 1;
-      const p = Math.min(1, Math.max(0, window.scrollY / h));
-      if (p === last) return;
-      if (p >= 1 && last >= 1) return;
-      last = p;
-      el.style.setProperty("--hxs", p.toFixed(4));
+      const p = Math.min(1, Math.max(0, window.scrollY / (el.offsetHeight || 1)));
+      const q = Math.round(p * 500) / 500;
+      if (q === last) return;
+      last = q;
+      if (video) { video.style.scale = String(1 + q * 0.08); video.style.translate = `0 ${(q * 12).toFixed(2)}%`; }
+      if (body) body.style.translate = `0 ${(q * -60).toFixed(1)}px`;
+      if (trust) trust.style.translate = `0 ${(q * -30).toFixed(1)}px`;
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); if (raf) cancelAnimationFrame(raf); };
+    return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
   }, []);
   // "20+ years" counts up once the video's info bar is actually on screen.
   const badgeRaw = get("home.about.badgeNum", "20");
